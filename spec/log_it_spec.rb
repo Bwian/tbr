@@ -10,24 +10,13 @@ describe LogIt do
     let(:log) { LogIt.instance }
     let(:fname) { './spec/test.log' }
     
-    before :each do
-      FileUtils.rm_f(fname)
-  		log.to_file(fname)
-    end
-    
     it "writes the log file" do   
-  		log.warn("Hello World")
-  		log.close
-    
+  		log_test('to_file',log,fname,[fname])
       expect(File.size(fname)).to be > 0
     end
     
-    it "doesn't write the log file" do
-      log.close
-      log.to_null
-      log.warn("Hello world")
-      log.close
-      
+    it "doesn't write the log file" do      
+      log_test('to_null',log,fname,[])
       expect(File.size(fname)).to eq 0
     end
     
@@ -39,7 +28,12 @@ describe LogIt do
 
   private
   
-  def log_test(method,log,fname)
-    
+  def log_test(method,log,fname,args)
+    FileUtils.rm_f(fname)
+		log.to_file(fname)
+    log.close
+    log.send(method,*args)
+		log.warn("Hello World")
+		log.close 
   end
 end
