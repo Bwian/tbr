@@ -5,6 +5,8 @@ TEST_PHONE  = '0418501461'
 CALL_TYPES 	= './spec/data/call_types.csv'
 SERVICES 		= './spec/data/services.csv'
 BILLS 			= './spec/data/bills.csv'
+EMPTY       = './spec/data/empty.csv'
+INVALID     = './spec/data/invalid.csv'
 MISSING			= './spec/data/missing.csv'
 LOGFILE			= './spec/data/test.log'
 
