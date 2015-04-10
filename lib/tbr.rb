@@ -22,6 +22,10 @@ module Tbr
       @log.info("Extracting Call Types from #{from}")
       call_type = CallType.new
       call_type.load(from)
+      
+      services = Services.new
+      groups = Groups.new
+
     end
   end
 end

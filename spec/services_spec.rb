@@ -1,9 +1,5 @@
 require_relative 'spec_helper'
 
-ONE   = '1234'
-TWO   = '2345'
-THREE = '3456'
-
 describe Services do
 
   let(:services) { Services.new }
