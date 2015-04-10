@@ -51,5 +51,30 @@ describe ParseFiles do
       expect(services.size).to eq 14
     end
   end
+  
+  describe ".parse_bill_file" do
+    let(:call_type) { CallType.new }
+  
+    before :each do
+      call_type.load(CALL_TYPES)
+      @invoice_date = ParseFiles.parse_bill_file(services,call_type,BILLS)
+    end
+    
+    it "returns invoice date" do
+      expect(@invoice_date).to eq '20130619'
+    end
+    
+    it "collates services" do
+      service = services.service('0418133125')
+      expect(service.service_summaries.size).to eq 8
+      expect(service.call_details.size).to eq 147
+    end
+    
+    context "missing bill file" do
+      it "should throw an exception" do
+        expect { ParseFiles.parse_bill_file(services,call_type,MISSING) }.to raise_error IOError
+      end
+    end
+  end
     
 end
