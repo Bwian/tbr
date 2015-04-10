@@ -25,23 +25,17 @@ class ParseFiles
     out
 	end
   
-  def self.map_services(groups,services,services_file)
-    begin				
-			CSV.foreach(services_file) do |fields|
-				next if !valid_fields(fields)
-				
-				group = groups.group(fields[SERVICE_GROUP])
-				service = services.service(fields[SERVICE_NUMBER])
-				service.name = fields[SERVICE_NAME]
-				service.cost_centre = fields[SERVICE_CC]
-				group.add_service(service)
-			end
-      LogIt.instance.warn("Empty services file. All services will be classified as unassigned") if File.size(services_file) == 0
-		rescue Errno::ENOENT
-      message = "Error accessing services file: #{services_file}"
-			LogIt.instance.error(message)
-      raise IOError, message
+  def self.map_services(groups,services,services_list)			
+		services_list.each do |fields|
+			next if !valid_fields(fields)
+			
+			group = groups.group(fields[SERVICE_GROUP])
+			service = services.service(fields[SERVICE_NUMBER])
+			service.name = fields[SERVICE_NAME]
+			service.cost_centre = fields[SERVICE_CC]
+			group.add_service(service)
 		end
+    LogIt.instance.warn("Empty services list. All services will be classified as unassigned") if services.size == 0
 	end
 	
 	def self.parse_bill_file(services,call_type,bill_file)
