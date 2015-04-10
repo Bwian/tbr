@@ -3,6 +3,8 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'tbr/version'
 require 'tbr/log_it'
+require 'tbr/call_type'
+require 'tbr/service'
 
 Gem::Specification.new do |spec|
   spec.name          = "tbr"

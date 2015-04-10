@@ -10,14 +10,18 @@ describe LogIt do
     let(:log) { LogIt.instance }
     let(:fname) { './spec/test.log' }
     
-    it "writes the log file" do   
-  		log_test('to_file',log,fname,[fname])
-      expect(File.size(fname)).to be > 0
+    context "log file name supplied" do
+      it "writes the log file" do   
+    		log_test('to_file',log,fname,[fname])
+        expect(File.size(fname)).to be > 0
+      end
     end
     
-    it "doesn't write the log file" do      
-      log_test('to_null',log,fname,[])
-      expect(File.size(fname)).to eq 0
+    context "log file name not supplied" do
+      it "doesn't write the log file" do      
+        log_test('to_null',log,fname,[])
+        expect(File.size(fname)).to eq 0
+      end
     end
     
     after :each do

@@ -1,5 +1,7 @@
 require "tbr/version"
 require "tbr/log_it"
+require 'tbr/call_type'
+require 'tbr/service'
 
 module Tbr
   def self.process(from,to,services,log)    
@@ -17,7 +19,9 @@ module Tbr
     if from.nil? || !File.exist?(from)
       @log.error("Input file #{from} does not exist.")
     else
-      
+      @log.info("Extracting Call Types from #{from}")
+      call_type = CallType.new
+      call_type.load(from)
     end
   end
 end
