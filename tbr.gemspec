@@ -10,6 +10,7 @@ require 'tbr/log_it'
 #require 'tbr/parse_files'
 require 'tbr/service'
 require 'tbr/services'
+require 'tbr/service_summary'
 
 Gem::Specification.new do |spec|
   spec.name          = "tbr"
