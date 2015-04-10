@@ -6,6 +6,7 @@ require 'tbr/log_it'
 require 'tbr/call_type'
 require 'tbr/service'
 require 'tbr/services'
+require 'tbr/group'
 
 Gem::Specification.new do |spec|
   spec.name          = "tbr"
