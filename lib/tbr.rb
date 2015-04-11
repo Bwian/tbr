@@ -2,6 +2,7 @@ require "tbr/version"
 require "tbr/log_it"
 require 'tbr/call_detail'
 require 'tbr/call_type'
+require 'tbr/create_files'
 require 'tbr/group'
 require 'tbr/groups'
 require 'tbr/parse_files'
@@ -17,7 +18,7 @@ module Tbr
     ParseFiles.parse_services_file(file)
   end
   
-  def self.process(from,to,service_list,log)    
+  def self.process(from,to,service_list,log,replace)    
     LogIt.instance.to_file(log) if log      
     @log = LogIt.instance
     @log.info("Processing Telstra Bill File: #{from}")
@@ -51,5 +52,22 @@ module Tbr
     	group.add_service(service) if service.name == UNASSIGNED
     end
     
+    cf = CreateFiles.new(invoice_date,@to,replace)
+    
+    @log.info("Creating group summaries")
+    groups.each do |group|
+      cf.group_summary(group)
+    end
+
+    @log.info("Creating service details")
+    services.each do |service|
+      cf.call_details(service)
+    end
+
+    @log.info("Creating service totals summary")
+    cf.service_totals(services)
+    
+    @log.info("PDF report files can be found in #{cf.dir_full_root}.") 
+    @log.info("Telstra billing data extract completed.") 
   end
 end

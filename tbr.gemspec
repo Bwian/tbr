@@ -4,6 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'tbr/version'
 require 'tbr/call_detail'
 require 'tbr/call_type'
+require 'tbr/create_files'
 require 'tbr/group'
 require 'tbr/groups'
 require 'tbr/log_it'
@@ -30,4 +31,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "pry"
+  spec.add_development_dependency "pry-nav"
+  
+  spec.add_runtime_dependency "prawn"
+  spec.add_runtime_dependency "prawn-table"
+  spec.add_runtime_dependency "prawn-print"
 end
