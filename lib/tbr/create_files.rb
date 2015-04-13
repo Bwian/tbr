@@ -1,14 +1,6 @@
-=begin
-gem 'prawn','=0.15.0'
-require 'prawn'
-require 'prawn/measurement_extensions'
-require 'time'
 require 'fileutils'
-require_relative 'group'
-require_relative 'service'
-require_relative 'log_it'
-require_relative 'configure'
-=end
+require 'prawn'
+require 'prawn/table'
 
 class CreateFiles
 	ROW_COLOUR_ODD    = "EBD6D6"
@@ -65,8 +57,8 @@ class CreateFiles
   
   private
   
-  def header(pdf,heading,name)
-  	pdf.table([
+  def header(pdf,heading,name)	
+    pdf.table([
 			[{:image => "./images/logo.jpg", :scale => 0.1, :rowspan => 2}, 
 			{:content => heading, :rowspan => 2, :text_color => UCB_GREEN, :size => 20, :font_style => :bold },
 			{:content => @invoice_month, :text_color => UCB_RED, :font_style => :bold}],
@@ -76,7 +68,7 @@ class CreateFiles
 			cells.borders = []
 			column(2).style(:align => :right)
 			column(1).style(:align => :center)
-		end
+		end   
   end
   
   def footer(pdf)
@@ -109,7 +101,7 @@ class CreateFiles
 			
 			pdf.font_size 10
 			pdf.move_down 18
-			
+			      
 			pdf.table(data, 
 				:row_colors => [ROW_COLOUR_EVEN, ROW_COLOUR_ODD],
 				:header => :true, 
@@ -121,7 +113,7 @@ class CreateFiles
 				row(0).background_color = ROW_COLOUR_HEAD
 				column(6).style(:align => :right)
 			end
-			
+
 			footer(pdf)
 		end
   end
@@ -155,7 +147,7 @@ class CreateFiles
 				row([0,last]).background_color = ROW_COLOUR_HEAD
 				column(3).style(:align => :right)
 			end
-			
+
 			footer(pdf)
   	end
   end
@@ -186,6 +178,7 @@ class CreateFiles
 				row([0,last]).background_color = ROW_COLOUR_HEAD
 				column([2,4]).style(:align => :right)
 			end
+
 		end
   end
 
