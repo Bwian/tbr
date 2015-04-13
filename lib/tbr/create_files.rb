@@ -11,12 +11,14 @@ class CreateFiles
 	
 # Header for each phone service
 	attr_reader :invoice_month, :dir_root
+  attr_accessor :logo
 	
   def initialize(invoice_date,dir_out,replace)
     @invoice_month  = Time.parse(invoice_date).strftime('%B %Y')
   	@dir_root       = "#{dir_out || '/tmp'}/#{invoice_date[0..5]}"	
   	@dir_summaries  = "#{@dir_root}/summaries"
-  	@dir_details    = "#{@dir_root}/details"
+  	@dir_details    = "#{@dir_root}/details"    
+    @logo           = nil
     
   	FileUtils.rm_rf(@dir_root) if replace
     raise IOError, "#{dir_full_root} already exists" if File.exist?(@dir_root)
@@ -42,24 +44,11 @@ class CreateFiles
     File.realdirpath(@dir_root)
   end
   
-  def self.archive(bill_file)
-    to_file = "#{Configure.instance.archive}/#{File.basename(bill_file,'.csv')}#{Time.now.strftime('%Y%m%d.%H%M%S.csv')}"
-    
-    begin
-      FileUtils.mv(bill_file,to_file)
-    rescue Errno::ENOENT
-      message = "Error creating archive file: #{to_file}.  Check configuration."
-			LogIt.instance.error(message)
-      raise IOError, message
-    end
-    LogIt.instance.info("Billing file archived to #{File.realdirpath(to_file)}")
-  end
-  
   private
   
   def header(pdf,heading,name)	
     pdf.table([
-			[{:image => "./images/logo.jpg", :scale => 0.1, :rowspan => 2}, 
+			[{:image => @logo, :scale => 0.1, :rowspan => 2}, 
 			{:content => heading, :rowspan => 2, :text_color => UCB_GREEN, :size => 20, :font_style => :bold },
 			{:content => @invoice_month, :text_color => UCB_RED, :font_style => :bold}],
 			[{:content => name, :text_color => UCB_RED, :font_style => :bold}]
@@ -77,9 +66,9 @@ class CreateFiles
   end
   
   def create_group_summary(group)
-  	fname = "#{@dir_summaries}/#{group.name} - #{@invoice_month}.pdf"
-  	Prawn::Document.generate(fname, :page_layout => :portrait, :page_size => "A4") do |pdf|
-  		header(pdf,"Telstra Billing Summary","Manager: #{group.name}")
+    fname = "#{@dir_summaries}/#{group.name} - #{@invoice_month}.pdf"
+    Prawn::Document.generate(fname, :page_layout => :portrait, :page_size => "A4") do |pdf|
+      header(pdf,"Telstra Billing Summary","Manager: #{group.name}")
   		group.each do |service| 
 				format_summary(pdf,service)
 			end
@@ -161,24 +150,21 @@ class CreateFiles
 		end
 		data << ['','','','Total:', sprintf('$%7.2f',total)]
 		
-		pdf.group do
-			pdf.font_size 10
-			pdf.move_down 18
-			pdf.text("#{service.service_number_format} - #{service.name}", :style => :bold, :align => :center)
-			pdf.move_down 6
-			
-			pdf.table(data, 
-				:row_colors => [ROW_COLOUR_ODD, ROW_COLOUR_EVEN], 
-				:column_widths => [220,150,50,50,50]) do
-				cells.padding = 2
-				cells.borders = []
-	
-				last = data.size - 1
-				row([0,last]).font_style = :bold
-				row([0,last]).background_color = ROW_COLOUR_HEAD
-				column([2,4]).style(:align => :right)
-			end
+		pdf.font_size 10
+		pdf.move_down 18
+		pdf.text("#{service.service_number_format} - #{service.name}", :style => :bold, :align => :center)
+		pdf.move_down 6
+		
+		pdf.table(data, 
+			:row_colors => [ROW_COLOUR_ODD, ROW_COLOUR_EVEN], 
+			:column_widths => [220,150,50,50,50]) do
+			cells.padding = 2
+			cells.borders = []
 
+			last = data.size - 1
+			row([0,last]).font_style = :bold
+			row([0,last]).background_color = ROW_COLOUR_HEAD
+			column([2,4]).style(:align => :right)
 		end
   end
 
