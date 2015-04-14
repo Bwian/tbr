@@ -13,7 +13,7 @@ require 'tbr/service_summary'
 module Tbr
   
   UNASSIGNED	= 'Unassigned'
-  USAGE       = 'usage: Tbr.process filename, [ output: output_filename, services: service_array, log: log_filename, replace: true/false, logo: logo_filename ]'
+  USAGE       = 'usage: Tbr.process filename, [ output: output_pathname, services: service_array, log: log_filename, replace: true/false, logo: logo_filename ]'
   
   def self.parse_services_file(file)
     ParseFiles.parse_services_file(file)
