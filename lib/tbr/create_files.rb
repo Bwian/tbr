@@ -47,8 +47,9 @@ class CreateFiles
   private
   
   def header(pdf,heading,name)	
+    logo_path = @logo || File.join(File.dirname(__FILE__), '../logo.jpg')
     pdf.table([
-			[{:image => @logo, :scale => 0.1, :rowspan => 2}, 
+			[{:image => logo_path, :scale => 0.1, :rowspan => 2}, 
 			{:content => heading, :rowspan => 2, :text_color => UCB_GREEN, :size => 20, :font_style => :bold },
 			{:content => @invoice_month, :text_color => UCB_RED, :font_style => :bold}],
 			[{:content => name, :text_color => UCB_RED, :font_style => :bold}]

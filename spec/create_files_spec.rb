@@ -52,10 +52,6 @@ describe CreateFiles do
       ParseFiles.map_services(@groups,@services,service_list)
       @invoice_date = ParseFiles.parse_bill_file(@services,call_type,BILLS)
     end
-    
-    before :each do
-      cf.logo = './spec/data/logo.jpg'
-    end
   
     it '#group_summary' do   
       count = 0
