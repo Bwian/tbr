@@ -38,7 +38,7 @@ Raises IOError if the input file doesn't exist.
 
 Log messages are written to track progress and record use of default settings.
 
-A top-level directory is created in the output path named in the format _YYYYDD_, the underlying date being extracted from the Telstra billing file.  A _details_ subdirectory contains seaparate files for each service.  A _summaries_ subdirectory contains summaries for each service by service group as specified in the _:services_ array argument to _process()_. The top-level directory also contains an overall _Service Totals_ file containing one line per service.
+A top-level directory is created in the output path named in the format _YYYYDD_, the underlying date being extracted from the Telstra billing file.  A _details_ subdirectory contains separate files for each service.  A _summaries_ subdirectory contains summaries for each service by service group as specified in the _:services_ array argument to _process()_. The top-level directory also contains an overall _Service Totals_ file containing one line per service.
 
 ###  parse__services__file
 Accepts one argument - the path name of a csv file in which the first four cells in each row equate to those in the array of the _:services_ argument to _process()_.
