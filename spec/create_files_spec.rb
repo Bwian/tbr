@@ -42,7 +42,7 @@ describe CreateFiles do
     end
   end
   
-  describe 'pdf file creation methods should return no error in:' do
+  describe 'pdf file creation methods should return no error in:', pdf: true do
     before :all do
       @groups = Groups.new
       @services = Services.new
