@@ -13,7 +13,7 @@ require 'tbr/service_summary'
 module Tbr
   
   UNASSIGNED	= 'Unassigned'
-  USAGE       = 'usage: Tbr.process filename, [ output: output_pathname, services: service_array, log: log_filename, replace: true/false, logo: logo_filename ]'
+  USAGE       = 'usage: Tbr.process filename, [ output: output_pathname, services: service_array, log: log_filename, replace: true/false, logo: logo_filename, original: original_filename ]'
   
   def self.parse_services_file(file)
     ParseFiles.parse_services_file(file)
@@ -28,10 +28,11 @@ module Tbr
     
     replace = options[:replace] || false
     logo    = options[:logo]
+    fname   = options[:original] || input  # if anonymous tmp file used after upload
     
     LogIt.instance.to_file(options[:log]) if options[:log]      
     log = LogIt.instance
-    log.info("Processing Telstra Bill File: #{input}")
+    log.info("Processing Telstra Bill File: #{fname}")
     
     service_list = options[:services] || []
     log.warn("All services will be classified as unassigned") if service_list.empty?
@@ -46,14 +47,14 @@ module Tbr
       raise IOError, message
     end
 
-    log.info("Extracting Call Types from #{input}")
+    log.info("Extracting Call Types from #{fname}")
     call_type = CallType.new
     call_type.load(input)
     
     services = Services.new
     groups = Groups.new
     
-    log.info("Extracting billing data from #{input}")
+    log.info("Extracting billing data from #{fname}")
     ParseFiles.map_services(groups,services,service_list)
     invoice_date = ParseFiles.parse_bill_file(services,call_type,input)
 

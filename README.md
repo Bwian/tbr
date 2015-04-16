@@ -32,6 +32,8 @@ _:replace_  - boolean flag which determines replacement of pre-existing output f
 
 _:logo_     - logo pathname.  Defaults to the logo.jpg in the tbr gem
 
+_:original_ - original filename.  Used for log messages if uploaded file uses an anonymous temporary filename
+
 Raises ArgumentError along with usage message if first argument isn't a String or subsequent arguments aren't Hash elements.
 
 Raises IOError if the input file doesn't exist.
