@@ -63,11 +63,23 @@ class ParseFiles
 						service.add_call_detail(call_detail)
 				end	
 			end
+      
+      if invoice_date.empty?
+  			message = "Invalid billing file: #{bill_file}"
+  			LogIt.instance.fatal(message)
+        raise ArgumentError, message
+      end
+      
 		rescue Errno::ENOENT
 			message = "Error accessing billing file: #{bill_file}"
 			LogIt.instance.fatal(message)
       raise IOError, message
-		end
+      
+		rescue ArgumentError => e
+      message = "Error parsing billing file: #{bill_file}"
+			LogIt.instance.fatal(message) unless e.message.start_with?('Invalid')
+      raise ArgumentError, message
+    end
 		
 		invoice_date
 	end

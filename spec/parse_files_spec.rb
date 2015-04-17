@@ -75,6 +75,12 @@ describe ParseFiles do
         expect { ParseFiles.parse_bill_file(services,call_type,MISSING) }.to raise_error IOError
       end
     end
+    
+    context "invalid bill file" do
+      it "should throw an exception" do
+        expect { ParseFiles.parse_bill_file(services,call_type,INVALID) }.to raise_error ArgumentError
+      end
+    end
   end
     
 end

@@ -21,8 +21,12 @@ class CreateFiles
     @logo           = nil
     
   	FileUtils.rm_rf(@dir_root) if replace
-    raise IOError, "#{dir_full_root} already exists" if File.exist?(@dir_root)
-  	
+    if File.exist?(@dir_root)
+      message = "Output directory #{dir_full_root} already exists."
+      LogIt.instance.fatal(message)
+      raise IOError, message 
+    end
+  
     Dir.mkdir(@dir_root) 	
   	Dir.mkdir(@dir_summaries)
   	Dir.mkdir(@dir_details)
