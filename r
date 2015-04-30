@@ -1,0 +1,1 @@
+rspec -t ~pdf

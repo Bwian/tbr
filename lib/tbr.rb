@@ -14,6 +14,7 @@ module Tbr
   
   UNASSIGNED	= 'Unassigned'
   USAGE       = 'usage: Tbr.process filename, [ output: output_pathname, services: service_array, log: log_filename, replace: true/false, logo: logo_filename, original: original_filename ]'
+  DEFAULT_LOG = '/tmp/tbr.log'
   
   def self.parse_services_file(file)
     ParseFiles.parse_services_file(file)
@@ -30,9 +31,13 @@ module Tbr
     logo    = options[:logo]
     fname   = options[:original] || input  # if anonymous tmp file used after upload
     
-    LogIt.instance.to_file(options[:log]) if options[:log]      
+    logfile = options[:log] || DEFAULT_LOG
+    logfile = DEFAULT_LOG unless Dir.exist?(File.dirname(logfile))
+    logfile = DEFAULT_LOG if File.exist?(logfile) && !File.writable?(logfile)
+    LogIt.instance.to_file(logfile)      
     log = LogIt.instance
     log.info("Processing Telstra Bill File: #{fname}")
+    log.warn("Log file #{options[:log] || 'nil'} cannot be written. Logging to #{DEFAULT_LOG}") if logfile == DEFAULT_LOG  
     
     service_list = options[:services] || []
     log.warn("All services will be classified as unassigned") if service_list.empty?
