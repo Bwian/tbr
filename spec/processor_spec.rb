@@ -1,5 +1,5 @@
 require_relative 'spec_helper'
-require 'tbr'
+#require 'tbr/processor'
 
 LOG_DEFAULT  = '/tmp/tbr.log'
 LOG_FILE     = '/tmp/tbrlogfile'
@@ -7,23 +7,25 @@ LOG_MISSING  = '/tmp/tbr/missing.log'
 LOG_READONLY = './spec/data/readonly.log'
 PDF_SUBDIR   = '201306'
 
-describe Tbr do
-
-  describe "#process" do
+describe Tbr::Processor do
+  
+  let(:tbr) { Tbr::Processor.new }
+  
+  describe ".process" do
     it "raises an ArgumentError if file argument not provided" do
-      expect { Tbr.process(one: 1) }.to raise_error ArgumentError
+      expect { tbr.process(one: 1) }.to raise_error ArgumentError
     end
     
     it "raises an ArgumentError if extra options not Hash" do
-      expect { Tbr.process('file',2) }.to raise_error ArgumentError
+      expect { tbr.process('file',2) }.to raise_error ArgumentError
     end
     
     it "raises an IOError if input file not found" do
-      expect { Tbr.process(MISSING) }.to raise_error IOError
+      expect { tbr.process(MISSING) }.to raise_error IOError
     end
   end
   
-  describe "#process - logging" do
+  describe ".process - logging" do
     before :each do
       FileUtils.rm_f(LOG_DEFAULT)
       FileUtils.rm_f(LOG_FILE)
@@ -51,7 +53,7 @@ describe Tbr do
     end
   end
   
-  describe "#process - writing output" do
+  describe ".process - writing output" do
     before :each do
       FileUtils.rm_rf("#{OUT_DIR}/#{PDF_SUBDIR}")
       FileUtils.rm_rf("/tmp/#{PDF_SUBDIR}")
@@ -78,7 +80,7 @@ describe Tbr do
   
   def process(file,options)
     begin
-      Tbr.process(file, options)
+      tbr.process(file, options)
     rescue  
     end
   end
