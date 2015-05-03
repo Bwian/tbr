@@ -14,7 +14,7 @@ describe CreateFiles do
     it "should set instance variables" do
       expect(cf.invoice_month).to eq 'April 2013'
       expect(cf.dir_root).to eq "#{OUT_DIR}/201304"
-      expect(cf.logo).to be_nil
+      expect(cf.logo).to end_with "../logo.jpg"
       expect(Dir.exist?("#{OUT_DIR}/201304/summaries")).to be_truthy
       expect(Dir.exist?("#{OUT_DIR}/201304/details")).to be_truthy
     end
@@ -26,7 +26,7 @@ describe CreateFiles do
     end
     
     context "directory already exists" do
-      it "should throw an exception" do
+      it "should raise an exception" do
         CreateFiles.new('20130418',OUT_DIR,false)
         expect { CreateFiles.new('20130418',OUT_DIR,false) }.to raise_error IOError
       end

@@ -11,7 +11,7 @@ BILLS 			= './spec/data/bills.csv'
 EMPTY       = './spec/data/empty.csv'
 INVALID     = './spec/data/invalid.csv'
 MISSING			= './spec/data/missing.csv'
-LOGFILE			= './spec/data/test.log'
+
 
 ONE         = '1234'
 TWO         = '2345'

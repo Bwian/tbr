@@ -1,23 +1,142 @@
 require_relative 'spec_helper'
-#require 'tbr/processor'
 
 LOG_DEFAULT  = '/tmp/tbr.log'
 LOG_FILE     = '/tmp/tbrlogfile'
 LOG_MISSING  = '/tmp/tbr/missing.log'
 LOG_READONLY = './spec/data/readonly.log'
-PDF_SUBDIR   = '201306'
+PDF_DIR      = '/tmp/201306'
 
-describe Tbr::Processor do
+#TODO: :original
+describe Tbr::Processor, just_this: true  do
   
   let(:tbr) { Tbr::Processor.new }
   
-  describe ".process" do
-    it "raises an ArgumentError if file argument not provided" do
-      expect { tbr.process(one: 1) }.to raise_error ArgumentError
+  before :each do
+    FileUtils.rm_f(LOG_DEFAULT)
+    FileUtils.rm_f(LOG_FILE)
+    tbr.log = LOG_FILE
+  end
+  
+  describe "#initialize" do
+    it "should set log to default" do  
+      expect(Tbr::Processor.new.logpath).to eq '/dev/null'
     end
     
-    it "raises an ArgumentError if extra options not Hash" do
-      expect { tbr.process('file',2) }.to raise_error ArgumentError
+    it "should set logo to default" do
+      expect(tbr.logo).to include 'lib/tbr/../logo.jpg'
+    end
+    
+    it "should set replace to false" do
+      expect(tbr.replace).to be_falsy
+    end
+    
+    it "should set services to an empty array" do
+      expect(tbr.services).to eq []
+    end
+  end
+  
+  describe ".log=" do
+    context "with no log path" do
+      it "should log to /dev/null" do
+        tbr.log = nil
+        expect(tbr.logpath).to eq '/dev/null'
+      end
+    
+      it "should log to STDOUT" do
+        tbr.log = 'stdout'
+        expect(tbr.logpath).to eq 'STDOUT'
+      end
+    
+      it "should log to STDERR" do
+        tbr.log = 'stderr'
+        expect(tbr.logpath).to eq 'STDERR'
+      end
+    end
+    
+    it "should log to LOG_DEFAULT if logpath is invalid" do
+      tbr.log = LOG_MISSING
+      expect(tbr.logpath).to eq LOG_DEFAULT
+      expect(check_file(LOG_DEFAULT)).to be_truthy
+    end
+    
+    it "should raise a TbrError" do 
+      FileUtils.touch(LOG_DEFAULT)
+      FileUtils.chmod(0444,LOG_DEFAULT)
+      expect { tbr.log = LOG_MISSING }.to raise_error Tbr::TbrError
+    end
+    
+    describe "logs to", pdf: true do
+      before :each do
+        FileUtils.rm_rf(PDF_DIR)
+        tbr.replace = true
+      end
+      
+      it "if log directory is valid" do
+        process(BILLS)
+        expect(check_file(LOG_FILE)).to be_truthy
+      end
+      
+      it "should write to /tmp if log directory is invalid" do
+        tbr.log = LOG_MISSING
+        process(BILLS)
+        expect(check_file(LOG_DEFAULT)).to be_truthy
+      end  
+    end
+  end
+  
+  describe ".logo=" do  
+    it "should use default logo if argument is nil" do
+      tbr.logo = nil
+      expect(tbr.logo).to end_with 'lib/tbr/../logo.jpg'
+      expect(check_file(LOG_FILE)).to be_falsy
+    end
+    
+    it "should use a logo with a valid path" do 
+      tbr.logo = './spec/data/test_logo.jpg'
+      expect(tbr.logo).to eq './spec/data/test_logo.jpg'
+      expect(check_file(LOG_FILE)).to be_falsy
+    end
+    
+    it "should use default logo if path is invalid and write log entry" do
+      tbr.logo = './spec/data/missing_logo.jpg'
+      expect(tbr.logo).to end_with 'lib/tbr/../logo.jpg'
+      expect(check_file(LOG_FILE)).to be_truthy
+    end
+  end
+  
+  describe ".output=" do
+    it "should output to /tmp if argument is nil" do
+      tbr.output = nil
+      expect(tbr.output).to eq '/tmp'
+    end
+    
+    it "should output to supplied directory if directory exists" do
+      tbr.output = OUT_DIR
+      expect(tbr.output).to eq OUT_DIR
+    end
+    
+    it "should output to /tmp if output directory doesn't exist" do
+      tbr.output = "#{OUT_DIR}/missing"
+      expect(tbr.output).to eq '/tmp'
+      expect(check_file(LOG_FILE)).to be_truthy 
+    end
+  end
+  
+  describe ".services=" do
+    it "should set services to a valid array" do
+      tbr.services = [1,2,3]
+      expect(tbr.services).to eq [1,2,3]
+    end
+    
+    it "should raise an ArgumentError when service isn't an array" do
+      expect { tbr.services = 'error' }.to raise_error ArgumentError
+    end
+  end
+
+ 
+  describe ".process" do
+    it "raises an ArgumentError if argument is not a string" do
+      expect { tbr.process(nil) }.to raise_error ArgumentError
     end
     
     it "raises an IOError if input file not found" do
@@ -25,62 +144,32 @@ describe Tbr::Processor do
     end
   end
   
-  describe ".process - logging" do
+  describe ".process - writing output", pdf: true do
     before :each do
-      FileUtils.rm_f(LOG_DEFAULT)
-      FileUtils.rm_f(LOG_FILE)
+      FileUtils.rm_rf(PDF_DIR)
+      tbr.output = '/tmp'
     end
     
-    it "writes to logfile if log directory is valid" do
-      process(BILLS, log: LOG_FILE)
-      expect(check_file(LOG_FILE)).to be_truthy
+    it "writes to output if directory is valid" do
+      process(BILLS)
+      expect(Dir.exist?(PDF_DIR)).to be_truthy
+      expect(Dir.glob("#{PDF_DIR}/summaries/*").count).to eq 1
+      expect(Dir.glob("#{PDF_DIR}/details/*").count).to eq 16
     end
     
-    it "writes to /tmp if log directory is invalid" do
-      process(BILLS, log: LOG_MISSING)
-      expect(check_file(LOG_DEFAULT)).to be_truthy
-    end
-    
-    it "writes to /tmp if log argument not provided" do
-      process(BILLS,{})
-      expect(check_file(LOG_DEFAULT)).to be_truthy
-    end
-    
-    it "writes to /tmp if the logfile cannot be written" do
-      process(BILLS, log: LOG_READONLY)
-      expect(check_file(LOG_READONLY)).to be_falsy
-      expect(check_file(LOG_DEFAULT)).to be_truthy
+    it "creates summaries" do
+      tbr.services = [['0353319583','Adrian','105 Dana Street','103']]
+      process(BILLS)
+      binding.pry
+      expect(Dir.glob("#{PDF_DIR}/summaries/*").count).to eq 2
     end
   end
-  
-  describe ".process - writing output" do
-    before :each do
-      FileUtils.rm_rf("#{OUT_DIR}/#{PDF_SUBDIR}")
-      FileUtils.rm_rf("/tmp/#{PDF_SUBDIR}")
-      FileUtils.rm_f(LOG_DEFAULT)
-    end
-    
-    it "writes to output if directory is valid", pdf: true do
-      process(BILLS, output: OUT_DIR)
-      expect(Dir.exist?("#{OUT_DIR}/#{PDF_SUBDIR}")).to be_truthy
-    end
-    
-    it "writes to /tmp if directory is invalid", pdf: true do
-      process(BILLS, output: "/tmp/#{PDF_SUBDIR}")
-      expect(Dir.exist?("/tmp/#{PDF_SUBDIR}")).to be_truthy
-    end
-    
-    it "writes to /tmp if output argument not provided", pdf: true do
-      process(BILLS,{})
-      expect(Dir.exist?("/tmp/#{PDF_SUBDIR}")).to be_truthy
-    end 
-  end
-  
+
   private
   
-  def process(file,options)
+  def process(file)
     begin
-      tbr.process(file, options)
+      tbr.process(file)
     rescue  
     end
   end

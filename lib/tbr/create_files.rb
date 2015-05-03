@@ -18,7 +18,7 @@ class CreateFiles
   	@dir_root       = "#{dir_out || '/tmp'}/#{invoice_date[0..5]}"	
   	@dir_summaries  = "#{@dir_root}/summaries"
   	@dir_details    = "#{@dir_root}/details"    
-    @logo           = nil
+    @logo           = Tbr::Processor::LOGO_DEFAULT 
     
   	FileUtils.rm_rf(@dir_root) if replace
     if File.exist?(@dir_root)
@@ -51,7 +51,7 @@ class CreateFiles
   private
   
   def header(pdf,heading,name)	
-    logo_path = @logo || File.join(File.dirname(__FILE__), '../logo.jpg')
+    logo_path = @logo
     pdf.table([
 			[{:image => logo_path, :scale => 0.1, :rowspan => 2}, 
 			{:content => heading, :rowspan => 2, :text_color => UCB_GREEN, :size => 20, :font_style => :bold },
