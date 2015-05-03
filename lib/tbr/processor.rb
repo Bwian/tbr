@@ -30,7 +30,8 @@ module Tbr
       self.output   = options[:output]
       self.logo     = options[:logo]
       self.services = options[:services]
-      @replace      = options[:replace] || false 
+      @replace      = options[:replace] || false
+      @original     = options[:original] 
     end
     
     def import_services(services_file)
