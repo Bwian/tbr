@@ -35,6 +35,13 @@ describe Tbr::Processor, just_this: true  do
     end
   end
   
+  describe ".import_services" do
+    it "should import data in tbr.services" do
+      tbr.import_services(SERVICES)
+      expect(tbr.services.count).to eq 14
+    end
+  end
+  
   describe ".log=" do
     context "with no log path" do
       it "should log to /dev/null" do
@@ -132,7 +139,6 @@ describe Tbr::Processor, just_this: true  do
       expect { tbr.services = 'error' }.to raise_error ArgumentError
     end
   end
-
  
   describe ".process" do
     it "raises an ArgumentError if argument is not a string" do
@@ -160,7 +166,6 @@ describe Tbr::Processor, just_this: true  do
     it "creates summaries" do
       tbr.services = [['0353319583','Adrian','105 Dana Street','103']]
       process(BILLS)
-      binding.pry
       expect(Dir.glob("#{PDF_DIR}/summaries/*").count).to eq 2
     end
   end

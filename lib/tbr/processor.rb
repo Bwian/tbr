@@ -33,6 +33,10 @@ module Tbr
       @replace      = options[:replace] || false 
     end
     
+    def import_services(services_file)
+      @services = ParseFiles::parse_services_file(services_file)
+    end
+    
     def log=(logpath) 
       @logpath = nil
 
