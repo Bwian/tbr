@@ -7,7 +7,7 @@ LOG_READONLY = './spec/data/readonly.log'
 PDF_DIR      = '/tmp/201306'
 
 #TODO: :original
-describe Tbr::Processor, just_this: true  do
+describe Tbr::Processor do
   
   let(:tbr) { Tbr::Processor.new }
   
@@ -19,7 +19,7 @@ describe Tbr::Processor, just_this: true  do
   
   describe "#initialize" do
     it "should set log to default" do  
-      expect(Tbr::Processor.new.logpath).to eq '/dev/null'
+      expect(Tbr::Processor.new.logpath).to be_falsy
     end
     
     it "should set logo to default" do
@@ -44,19 +44,19 @@ describe Tbr::Processor, just_this: true  do
   
   describe ".log=" do
     context "with no log path" do
-      it "should log to /dev/null" do
+      it "should log nowhere" do
         tbr.log = nil
-        expect(tbr.logpath).to eq '/dev/null'
+        expect(tbr.logpath).to eq nil
       end
     
       it "should log to STDOUT" do
-        tbr.log = 'stdout'
-        expect(tbr.logpath).to eq 'STDOUT'
+        tbr.log = STDOUT
+        expect(tbr.logpath).to eq nil
       end
     
       it "should log to STDERR" do
-        tbr.log = 'stderr'
-        expect(tbr.logpath).to eq 'STDERR'
+        tbr.log = STDERR
+        expect(tbr.logpath).to eq nil
       end
     end
     
@@ -66,10 +66,15 @@ describe Tbr::Processor, just_this: true  do
       expect(check_file(LOG_DEFAULT)).to be_truthy
     end
     
-    it "should raise a TbrError" do 
+    it "should raise a TbrError if neither path is writable" do 
       FileUtils.touch(LOG_DEFAULT)
       FileUtils.chmod(0444,LOG_DEFAULT)
       expect { tbr.log = LOG_MISSING }.to raise_error Tbr::TbrError
+    end
+    
+    it "should log nowhere if file argument isn't a string" do
+      tbr.log = []
+      expect(tbr.logpath).to eq nil
     end
     
     describe "logs to", pdf: true do

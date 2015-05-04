@@ -1,4 +1,4 @@
-describe ParseFiles do
+describe ParseFiles, only: true do
   
   let(:service_list) { ParseFiles.parse_services_file(SERVICES) }
   let(:services) { Services.new }

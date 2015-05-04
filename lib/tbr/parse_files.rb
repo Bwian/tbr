@@ -16,10 +16,10 @@ class ParseFiles
 			CSV.foreach(services_file) do |fields|
         out << fields if valid_fields(fields)
 			end
-      LogIt.instance.warn("Empty or invalid services file: #{services_file}. All services will be classified as unassigned") if out.empty?
+      Tbr.log.warn("Empty or invalid services file: #{services_file}. All services will be classified as unassigned") if out.empty?
 		rescue Errno::ENOENT
       message = "Error accessing services file: #{services_file}"
-			LogIt.instance.error(message)
+			Tbr.log.error(message)
       raise IOError, message
 		end
     out
@@ -35,7 +35,7 @@ class ParseFiles
 			service.cost_centre = fields[SERVICE_CC]
 			group.add_service(service)
 		end
-    LogIt.instance.warn("Empty services list. All services will be classified as unassigned") if services.size == 0
+    Tbr.log.warn("Empty services list. All services will be classified as unassigned") if services.size == 0
 	end
 	
 	def self.parse_bill_file(services,call_type,bill_file)
@@ -66,18 +66,18 @@ class ParseFiles
       
       if invoice_date.empty?
   			message = "Invalid billing file: #{bill_file}"
-  			LogIt.instance.fatal(message)
+  			Tbr.log.fatal(message)
         raise ArgumentError, message
       end
       
 		rescue Errno::ENOENT
 			message = "Error accessing billing file: #{bill_file}"
-			LogIt.instance.fatal(message)
+			Tbr.log.fatal(message)
       raise IOError, message
       
 		rescue ArgumentError => e
       message = "Error parsing billing file: #{bill_file}"
-			LogIt.instance.fatal(message) unless e.message.start_with?('Invalid')
+			Tbr.log.fatal(message) unless e.message.start_with?('Invalid')
       raise ArgumentError, message
     end
 		
@@ -88,7 +88,7 @@ class ParseFiles
     return false if fields.size == 0
 		
 		if fields.size < 4
-			LogIt.instance.warn("Invalid services.csv record: - #{fields.to_s}")
+			Tbr.log.warn("Invalid services.csv record: - #{fields.to_s}")
 			return false
 		end
     

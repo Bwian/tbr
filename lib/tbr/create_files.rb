@@ -19,11 +19,12 @@ class CreateFiles
   	@dir_summaries  = "#{@dir_root}/summaries"
   	@dir_details    = "#{@dir_root}/details"    
     @logo           = Tbr::Processor::LOGO_DEFAULT 
+    @log            = Tbr.log
     
   	FileUtils.rm_rf(@dir_root) if replace
     if File.exist?(@dir_root)
       message = "Output directory #{dir_full_root} already exists."
-      LogIt.instance.fatal(message)
+      @log.fatal(message)
       raise IOError, message 
     end
   

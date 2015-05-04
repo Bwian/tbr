@@ -3,11 +3,17 @@ require "tbr/parse_files"
 
 module Tbr
   
-  class TbrError < StandardError; end
+	class << self
+		def log
+      @log || Logger.new(nil)
+    end
+    
+    def log=(log)
+      @log = Logger.new(log)
+    end
+	end	
   
-  def self.parse_services_file(file)
-    ParseFiles.parse_services_file(file)
-  end
+  class TbrError < StandardError; end
 
 end
 

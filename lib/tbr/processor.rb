@@ -25,7 +25,6 @@ module Tbr
       raise ArgumentError, USAGE unless options.class == Hash
       @logpath = nil
       
-      @log = LogIt.instance
       self.log      = options[:log]
       self.output   = options[:output]
       self.logo     = options[:logo]
@@ -41,27 +40,19 @@ module Tbr
     def log=(logpath) 
       @logpath = nil
 
-      case logpath
-        when nil, 'nil', 'null'
-          @logpath = '/dev/null'
-          @log.to_null
-        when 'stdout','STDOUT'
-          @logpath = 'STDOUT'
-          @log.to_stdout
-        when 'stderr','STDERR'
-          @logpath = 'STDERR'
-          @log.to_stderr
-        else
-          @logpath = check_log(logpath) || check_log(LOG_DEFAULT)
-          @log.to_file(@logpath) if @logpath
+      if logpath.class == String
+        @logpath = check_log(logpath) || check_log(LOG_DEFAULT)
+        
+        unless @logpath 
+          Tbr.log = STDOUT
+          raise TbrError, "Neither log file, #{logpath || 'nil'} or #{LOG_DEFAULT}, can be written"
+        end
       end
       
-      if @logpath      
-        @log.warn("Log file #{logpath || 'nil'} cannot be written. Logging to #{LOG_DEFAULT}") if @logpath == LOG_DEFAULT
-      else 
-        @log.to_stderr
-        raise TbrError, "Neither log file, #{logpath || 'nil'} or #{LOG_DEFAULT}, can be written"
-      end
+      Tbr.log = @logpath
+      @log = Tbr.log
+      
+      @log.warn("Log file #{logpath} cannot be written. Logging to #{LOG_DEFAULT}") if @logpath != logpath && logpath != LOG_DEFAULT
     end
     
     def logo=(logopath) 
@@ -139,6 +130,7 @@ module Tbr
     def check_log(path)
       begin
         file = File.open(path,'w')
+        file.close
         path
       rescue SystemCallError
         nil
