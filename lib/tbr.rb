@@ -1,5 +1,6 @@
+require 'logger'
+
 require "tbr/version"
-require "tbr/parse_files"
 
 module Tbr
   

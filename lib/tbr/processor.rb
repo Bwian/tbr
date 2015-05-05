@@ -1,4 +1,3 @@
-require "tbr/log_it"
 require 'tbr/call_detail'
 require 'tbr/call_type'
 require 'tbr/create_files'
