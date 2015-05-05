@@ -1,20 +1,17 @@
 require 'logger'
-
 require "tbr/version"
 
 module Tbr
   
 	class << self
 		def log
-      @log || Logger.new(nil)
+      @log || Logger.new(STDOUT)
     end
     
-    def log=(log)
-      @log = Logger.new(log)
+    def log=(logger)
+      @log = logger
     end
 	end	
-  
-  class TbrError < StandardError; end
 
 end
 

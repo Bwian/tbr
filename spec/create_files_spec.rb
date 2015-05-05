@@ -2,6 +2,10 @@ describe CreateFiles do
   
   let(:cf) { CreateFiles.new('20130418',OUT_DIR,true) }
   
+  before :all do
+    Tbr.log = Logger.new(nil)
+  end
+    
   before :each do
     FileUtils.rm_rf("#{OUT_DIR}/201304")
   end

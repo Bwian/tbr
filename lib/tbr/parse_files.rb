@@ -84,16 +84,9 @@ class ParseFiles
 		invoice_date
 	end
 	
-	def self.valid_fields(fields)
-    return false if fields.size == 0
-		
-		if fields.size < 4
-			Tbr.log.warn("Invalid services.csv record: - #{fields.to_s}")
-			return false
-		end
-    
+	def self.valid_fields(fields)	
+		return false if fields.size < 4    
     return false if fields[0].nil? or fields[0].empty? or fields[1].nil? or fields[1].empty?
-		
     return false unless fields[0].match(/[0-9]/)
     
     return true

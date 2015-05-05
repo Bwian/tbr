@@ -1,27 +1,18 @@
 require_relative 'spec_helper'
 
-LOG_DEFAULT  = '/tmp/tbr.log'
 LOG_FILE     = '/tmp/tbrlogfile'
-LOG_MISSING  = '/tmp/tbr/missing.log'
-LOG_READONLY = './spec/data/readonly.log'
 PDF_DIR      = '/tmp/201306'
 
-#TODO: :original
 describe Tbr::Processor do
   
   let(:tbr) { Tbr::Processor.new }
-  
+    
   before :each do
-    FileUtils.rm_f(LOG_DEFAULT)
     FileUtils.rm_f(LOG_FILE)
-    tbr.log = LOG_FILE
+    Tbr.log = Logger.new(LOG_FILE)
   end
   
   describe "#initialize" do
-    it "should set log to default" do  
-      expect(Tbr::Processor.new.logpath).to be_falsy
-    end
-    
     it "should set logo to default" do
       expect(tbr.logo).to include 'lib/tbr/../logo.jpg'
     end
@@ -42,77 +33,21 @@ describe Tbr::Processor do
     end
   end
   
-  describe ".log=" do
-    context "with no log path" do
-      it "should log nowhere" do
-        tbr.log = nil
-        expect(tbr.logpath).to eq nil
-      end
-    
-      it "should log to STDOUT" do
-        tbr.log = STDOUT
-        expect(tbr.logpath).to eq nil
-      end
-    
-      it "should log to STDERR" do
-        tbr.log = STDERR
-        expect(tbr.logpath).to eq nil
-      end
-    end
-    
-    it "should log to LOG_DEFAULT if logpath is invalid" do
-      tbr.log = LOG_MISSING
-      expect(tbr.logpath).to eq LOG_DEFAULT
-      expect(check_file(LOG_DEFAULT)).to be_truthy
-    end
-    
-    it "should raise a TbrError if neither path is writable" do 
-      FileUtils.touch(LOG_DEFAULT)
-      FileUtils.chmod(0444,LOG_DEFAULT)
-      expect { tbr.log = LOG_MISSING }.to raise_error Tbr::TbrError
-    end
-    
-    it "should log nowhere if file argument isn't a string" do
-      tbr.log = []
-      expect(tbr.logpath).to eq nil
-    end
-    
-    describe "logs to", pdf: true do
-      before :each do
-        FileUtils.rm_rf(PDF_DIR)
-        tbr.replace = true
-      end
-      
-      it "if log directory is valid" do
-        process(BILLS)
-        expect(check_file(LOG_FILE)).to be_truthy
-      end
-      
-      it "should write to /tmp if log directory is invalid" do
-        tbr.log = LOG_MISSING
-        process(BILLS)
-        expect(check_file(LOG_DEFAULT)).to be_truthy
-      end  
-    end
-  end
-  
   describe ".logo=" do  
     it "should use default logo if argument is nil" do
       tbr.logo = nil
       expect(tbr.logo).to end_with 'lib/tbr/../logo.jpg'
-      expect(check_file(LOG_FILE)).to be_falsy
     end
     
     it "should use a logo with a valid path" do 
       tbr.logo = './spec/data/test_logo.jpg'
       expect(tbr.logo).to eq './spec/data/test_logo.jpg'
-      expect(check_file(LOG_FILE)).to be_falsy
     end
     
     it "should use default logo if path is invalid and write log entry" do
       tbr.logo = './spec/data/missing_logo.jpg'
       expect(tbr.logo).to end_with 'lib/tbr/../logo.jpg'
-      expect(check_file(LOG_FILE)).to be_truthy
+      expect(check_log('could not be found')).to be_truthy
     end
   end
   
@@ -130,7 +65,7 @@ describe Tbr::Processor do
     it "should output to /tmp if output directory doesn't exist" do
       tbr.output = "#{OUT_DIR}/missing"
       expect(tbr.output).to eq '/tmp'
-      expect(check_file(LOG_FILE)).to be_truthy 
+      expect(check_log('No output directory')).to be_truthy 
     end
   end
   
@@ -162,34 +97,33 @@ describe Tbr::Processor do
     end
     
     it "writes to output if directory is valid" do
-      process(BILLS)
+      tbr.process(BILLS)
       expect(Dir.exist?(PDF_DIR)).to be_truthy
       expect(Dir.glob("#{PDF_DIR}/summaries/*").count).to eq 1
       expect(Dir.glob("#{PDF_DIR}/details/*").count).to eq 16
+      expect(check_log('Empty services list')).to be_truthy
+      expect(check_log('completed')).to be_truthy
     end
     
     it "creates summaries" do
       tbr.services = [['0353319583','Adrian','105 Dana Street','103']]
-      process(BILLS)
+      tbr.process(BILLS)
       expect(Dir.glob("#{PDF_DIR}/summaries/*").count).to eq 2
+      expect(check_log('Empty services list')).to be_falsy
+      expect(check_log('completed')).to be_truthy
     end
   end
 
   private
   
-  def process(file)
+  def check_log(sub)
     begin
-      tbr.process(file)
-    rescue  
-    end
-  end
-  
-  def check_file(fname)
-    begin
-      size = File.open(fname).size
+      File.open(LOG_FILE).each do |line|
+        return true if line.include?(sub)
+      end
+      return false
 		rescue Errno::ENOENT
       return false 
     end
-    size > 0 
   end
 end

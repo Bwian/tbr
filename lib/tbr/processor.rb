@@ -22,9 +22,10 @@ module Tbr
     
     def initialize(options = {})
       raise ArgumentError, USAGE unless options.class == Hash
-      @logpath = nil
+  
+      @log = Tbr.log
+      @log.info('Initialising Telstra Billing Reporter')
       
-      self.log      = options[:log]
       self.output   = options[:output]
       self.logo     = options[:logo]
       self.services = options[:services]
@@ -36,35 +37,22 @@ module Tbr
       @services = ParseFiles::parse_services_file(services_file)
     end
     
-    def log=(logpath) 
-      @logpath = nil
-
-      if logpath.class == String
-        @logpath = check_log(logpath) || check_log(LOG_DEFAULT)
-        
-        unless @logpath 
-          Tbr.log = STDOUT
-          raise TbrError, "Neither log file, #{logpath || 'nil'} or #{LOG_DEFAULT}, can be written"
-        end
-      end
-      
-      Tbr.log = @logpath
-      @log = Tbr.log
-      
-      @log.warn("Log file #{logpath} cannot be written. Logging to #{LOG_DEFAULT}") if @logpath != logpath && logpath != LOG_DEFAULT
-    end
-    
     def logo=(logopath) 
       @logo = logopath && File.exist?(logopath) ? logopath : LOGO_DEFAULT
       @log.warn("Logo #{logopath} could not be found.  Using default logo.") if logopath && @logo != logopath
     end
     
-    def output=(output)
-      @output = output || '/tmp'
-      if !Dir.exist?(@output) 
+    def output=(out)
+      if out.class == String && Dir.exist?(out) 
+        @output = out
+      else
         @output = '/tmp'
-        @log.warn("No output directory #{output || 'nil'}.  Files will be written to /tmp")
+        @log.warn("No output directory #{out || 'provided'}.  Files will be written to /tmp")
       end
+    end
+    
+    def output
+      @output || '/tmp'
     end
     
     def services=(services)
@@ -85,7 +73,7 @@ module Tbr
       end    
     
       @log.warn("All services will be classified as unassigned") if @services.empty?
-      @log.info("Files being written to #{@ouput}")
+      @log.info("Files being written to #{output}")
   
       @log.info("Extracting Call Types from #{fname}")
       call_type = CallType.new
@@ -103,6 +91,9 @@ module Tbr
       services.each do |service|
       	group.add_service(service) if service.name == UNASSIGNED
       end
+      
+      unassigned_count = groups.group(UNASSIGNED).size
+      @log.warn("#{unassigned_count} unassigned services") if unassigned_count > 0
     
       cf = CreateFiles.new(invoice_date,output,replace)
       cf.logo = @logo
