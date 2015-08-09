@@ -75,6 +75,10 @@ describe CreateFiles do
       expect(count).to eq 16
     end
     
+    it '#cost_centres' do
+      cf.cost_centre_totals({ '100' => 12.34, '101' => 56.78 })
+    end
+    
     it '#service_totals' do
       cf.service_totals(@services)
     end

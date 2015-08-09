@@ -100,14 +100,27 @@ module Tbr
     
       @log.info("Creating group summaries")
       groups.each do |group|
+        @log.info("Creating summary for #{group.name}")
         cf.group_summary(group)
       end
 
       @log.info("Creating service details")
       services.each do |service|
+        @log.info("Creating report for #{service.service_number}")
         cf.call_details(service)
       end
 
+      @log.info("Creating cost centre summary")
+      cost_centres = {}
+      services.each do |service|
+        cc = service.cost_centre
+        unless cc.empty?
+          cc_total = cost_centres[cc] || 0.0
+          cost_centres[cc] = cc_total + service.total
+        end
+      end
+      cf.cost_centre_totals(cost_centres)
+      
       @log.info("Creating service totals summary")
       cf.service_totals(services)
     

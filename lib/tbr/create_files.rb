@@ -40,6 +40,10 @@ class CreateFiles
   	create_call_details(service)	
   end
   
+  def cost_centre_totals(cost_centres)
+    create_cost_centre_totals(cost_centres.sort)
+  end
+  
   def service_totals(services)
   	create_service_totals(services)
   end
@@ -72,12 +76,24 @@ class CreateFiles
   
   def create_group_summary(group)
     fname = "#{@dir_summaries}/#{group.name} - #{@invoice_month}.pdf"
+    grand_total = 0.0
     Prawn::Document.generate(fname, :page_layout => :portrait, :page_size => "A4") do |pdf|
       header(pdf,"Telstra Billing Summary","Manager: #{group.name}")
   		group.each do |service| 
 				format_summary(pdf,service)
+        grand_total += service.total
 			end
-			footer(pdf)
+      
+      pdf.move_down 18
+  		pdf.table([['','','Grand Total:', sprintf('$%8.2f',grand_total)]],  
+  			:column_widths => [220,170,80,50]) do
+  			cells.padding = 2
+  			cells.borders = []
+  			row([0]).font_style = :bold
+  			row([0]).background_color = ROW_COLOUR_HEAD
+  			column([3]).style(:align => :right)
+  		end
+      footer(pdf)
   	end
   end
   
@@ -110,6 +126,41 @@ class CreateFiles
 
 			footer(pdf)
 		end
+  end
+  
+  def create_cost_centre_totals(cost_centres)
+  	fname = "#{@dir_root}/Cost Centres - #{@invoice_month}.pdf"
+  	
+  	data = [["Cost Centre", "Total"]]
+    
+    total = 0.0
+  	cost_centres.each do |cc| 
+      total += cc[1] 
+      data << [cc[0], sprintf('%8.2f',cc[1])]
+    end
+  	data << ['Total:', sprintf('$%8.2f',total)]
+    
+  	Prawn::Document.generate(fname, :page_layout => :portrait, :page_size => "A4") do |pdf|
+  		header(pdf,"Telstra Cost Centre Totals","")
+  		
+  		pdf.font_size 10
+			pdf.move_down 18
+			
+			pdf.table(data, 
+				:row_colors => [ROW_COLOUR_EVEN, ROW_COLOUR_ODD],
+				:header => :true, 
+				:column_widths => [370,150]) do
+				cells.padding = 2
+				cells.borders = []
+	
+				last = data.size - 1
+				row([0,last]).font_style = :bold
+				row([0,last]).background_color = ROW_COLOUR_HEAD
+				column(1).style(:align => :right)
+			end
+
+			footer(pdf)
+  	end
   end
   
   def create_service_totals(services)
