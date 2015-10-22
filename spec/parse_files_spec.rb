@@ -65,8 +65,8 @@ describe ParseFiles do
     end
     
     it "collates services" do
-      service = services.service('0418133125')
-      expect(service.service_summaries.size).to eq 8
+      service = services.service('0455553125')
+      expect(service.service_summaries.size).to eq 2
       expect(service.call_details.size).to eq 147
     end
     
